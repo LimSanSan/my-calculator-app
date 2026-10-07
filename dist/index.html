@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="A simple, fast calculator for everyday arithmetic.">
+  <title>Calculator</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230b1220'/%3E%3Cpath d='M17 20h30M32 13v14M18 39h11M35 36l10 10m0-10L35 46' stroke='%2338bdf8' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #070b13;
+      color: #f8fafc;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(14, 165, 233, .18), transparent 30%),
+        radial-gradient(circle at 85% 85%, rgba(99, 102, 241, .15), transparent 35%),
+        #070b13;
+    }
+
+    .shell { width: min(100%, 390px); }
+
+    .eyebrow {
+      margin: 0 0 14px 4px;
+      color: #7dd3fc;
+      font-size: .78rem;
+      font-weight: 750;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .calculator {
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, .18);
+      border-radius: 28px;
+      background: rgba(15, 23, 42, .86);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, .46), inset 0 1px 0 rgba(255, 255, 255, .05);
+      backdrop-filter: blur(22px);
+    }
+
+    .display {
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 28px 26px 22px;
+      border-bottom: 1px solid rgba(148, 163, 184, .12);
+    }
+
+    .expression {
+      min-height: 24px;
+      margin: 0 0 8px;
+      color: #94a3b8;
+      font-size: .98rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    .result {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      padding: 0;
+      background: transparent;
+      color: #f8fafc;
+      font: inherit;
+      font-size: clamp(2.4rem, 12vw, 3.75rem);
+      font-weight: 620;
+      letter-spacing: -.055em;
+      line-height: 1.05;
+      text-align: right;
+      text-overflow: ellipsis;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 18px;
+    }
+
+    button {
+      min-height: 66px;
+      border: 1px solid rgba(148, 163, 184, .1);
+      border-radius: 18px;
+      background: #182235;
+      color: #f8fafc;
+      font: inherit;
+      font-size: 1.18rem;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:hover { background: #22304a; border-color: rgba(125, 211, 252, .22); }
+    button:active { transform: scale(.95); }
+    button:focus-visible { outline: 3px solid rgba(56, 189, 248, .58); outline-offset: 2px; }
+    .utility { color: #7dd3fc; background: #142335; }
+    .operator { color: #bae6fd; background: #12314a; }
+    .equals { color: #06131e; background: #38bdf8; border-color: #38bdf8; }
+    .equals:hover { background: #7dd3fc; }
+    .zero { grid-column: span 2; }
+
+    .hint {
+      margin: 14px 0 0;
+      color: #64748b;
+      font-size: .8rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 420px) {
+      body { padding: 14px; }
+      .calculator { border-radius: 24px; }
+      .display { min-height: 132px; padding: 24px 21px 19px; }
+      .keys { gap: 8px; padding: 14px; }
+      button { min-height: 61px; border-radius: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <p class="eyebrow">Calculator</p>
+    <section class="calculator" aria-label="Calculator">
+      <div class="display" aria-live="polite">
+        <p class="expression" id="expression">Ready</p>
+        <output class="result" id="result">0</output>
+      </div>
+      <div class="keys" id="keys">
+        <button class="utility" data-action="clear" aria-label="Clear calculator">AC</button>
+        <button class="utility" data-action="delete" aria-label="Delete last digit">DEL</button>
+        <button class="utility" data-action="percent" aria-label="Convert to percentage">%</button>
+        <button class="operator" data-operator="/" aria-label="Divide">÷</button>
+        <button data-number="7">7</button><button data-number="8">8</button><button data-number="9">9</button>
+        <button class="operator" data-operator="*" aria-label="Multiply">×</button>
+        <button data-number="4">4</button><button data-number="5">5</button><button data-number="6">6</button>
+        <button class="operator" data-operator="-" aria-label="Subtract">−</button>
+        <button data-number="1">1</button><button data-number="2">2</button><button data-number="3">3</button>
+        <button class="operator" data-operator="+" aria-label="Add">+</button>
+        <button class="zero" data-number="0">0</button><button data-action="decimal" aria-label="Decimal point">.</button>
+        <button class="equals" data-action="equals" aria-label="Calculate result">=</button>
+      </div>
+    </section>
+    <p class="hint">Use your keyboard: numbers, operators, Enter, Escape, or Backspace.</p>
+  </main>
+
+  <script>
+    (() => {
+      const result = document.querySelector('#result');
+      const expression = document.querySelector('#expression');
+      const keys = document.querySelector('#keys');
+      let current = '0';
+      let previous = null;
+      let operator = null;
+      let resetNext = false;
+
+      const displayNumber = value => {
+        if (!Number.isFinite(Number(value))) return value;
+        const [whole, decimal] = String(value).split('.');
+        const formatted = Number(whole).toLocaleString('en-US');
+        return decimal !== undefined ? `${formatted}.${decimal}` : formatted;
+      };
+
+      const update = () => {
+        result.textContent = displayNumber(current);
+        expression.textContent = previous !== null && operator
+          ? `${displayNumber(previous)} ${operator === '*' ? '×' : operator === '/' ? '÷' : operator}`
+          : 'Ready';
+      };
+
+      const inputNumber = digit => {
+        if (current === 'Error' || resetNext) { current = digit; resetNext = false; }
+        else if (current === '0') current = digit;
+        else if (current.replace('-', '').replace('.', '').length < 12) current += digit;
+        update();
+      };
+
+      const inputDecimal = () => {
+        if (current === 'Error' || resetNext) { current = '0.'; resetNext = false; }
+        else if (!current.includes('.')) current += '.';
+        update();
+      };
+
+      const calculate = () => {
+        if (previous === null || !operator || current === 'Error') return;
+        const a = Number(previous), b = Number(current);
+        let value;
+        if (operator === '+') value = a + b;
+        if (operator === '-') value = a - b;
+        if (operator === '*') value = a * b;
+        if (operator === '/') value = b === 0 ? NaN : a / b;
+        expression.textContent = `${displayNumber(previous)} ${operator === '*' ? '×' : operator === '/' ? '÷' : operator} ${displayNumber(current)} =`;
+        current = Number.isFinite(value) ? String(Number(value.toPrecision(12))) : 'Error';
+        previous = null; operator = null; resetNext = true;
+        result.textContent = displayNumber(current);
+      };
+
+      const chooseOperator = next => {
+        if (current === 'Error') return;
+        if (operator && !resetNext) calculate();
+        previous = current;
+        operator = next;
+        resetNext = true;
+        update();
+      };
+
+      const action = name => {
+        if (name === 'clear') { current = '0'; previous = null; operator = null; resetNext = false; update(); }
+        if (name === 'delete') {
+          if (resetNext || current === 'Error') current = '0';
+          else current = current.length > 1 ? current.slice(0, -1) : '0';
+          update();
+        }
+        if (name === 'percent' && current !== 'Error') { current = String(Number(current) / 100); update(); }
+        if (name === 'decimal') inputDecimal();
+        if (name === 'equals') calculate();
+      };
+
+      keys.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        if (button.dataset.number !== undefined) inputNumber(button.dataset.number);
+        else if (button.dataset.operator) chooseOperator(button.dataset.operator);
+        else if (button.dataset.action) action(button.dataset.action);
+      });
+
+      window.addEventListener('keydown', event => {
+        if (/^[0-9]$/.test(event.key)) inputNumber(event.key);
+        else if (['+', '-', '*', '/'].includes(event.key)) chooseOperator(event.key);
+        else if (event.key === '.') inputDecimal();
+        else if (event.key === 'Enter' || event.key === '=') { event.preventDefault(); calculate(); }
+        else if (event.key === 'Backspace') action('delete');
+        else if (event.key === 'Escape') action('clear');
+        else if (event.key === '%') action('percent');
+      });
+    })();
+  </script>
+</body>
+</html>
