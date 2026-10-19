@@ -30,6 +30,18 @@ In **Authentication > URL Configuration** set:
 - Site URL: `https://limsansan.github.io/my-calculator-app/`
 - Additional redirect URL for local testing: `http://127.0.0.1:4173/**`
 
-## 4. Important limitation
+## 4. Configure custom SMTP
+
+Supabase's built-in email service only sends to addresses belonging to members of the Supabase project team and is limited to two emails per hour. To let every `@ri.edu.sg` user receive an OTP:
+
+1. Choose an SMTP provider such as Resend, AWS SES, Postmark, SendGrid, ZeptoMail, or Brevo.
+2. Open **Authentication > Emails > SMTP Settings** in Supabase.
+3. Enable custom SMTP and enter the provider's host, port, username, password, sender email, and sender name.
+4. Save the settings and send a test OTP.
+5. Review **Authentication > Rate Limits** before a larger rollout.
+
+Do not put SMTP credentials in this repository or in browser JavaScript.
+
+## 5. Important limitation
 
 The calculator is a static GitHub Pages app. Authentication gates the interface and Supabase data access, but it does not make the public HTML and JavaScript source private. Protect any future database tables with Row Level Security policies.
