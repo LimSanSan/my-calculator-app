@@ -4,7 +4,7 @@
 create or replace function public.hook_allow_ri_email_only(event jsonb)
 returns jsonb
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 declare
@@ -23,5 +23,6 @@ begin
 end;
 $$;
 
+grant usage on schema public to supabase_auth_admin;
 grant execute on function public.hook_allow_ri_email_only(jsonb) to supabase_auth_admin;
 revoke execute on function public.hook_allow_ri_email_only(jsonb) from authenticated, anon, public;
